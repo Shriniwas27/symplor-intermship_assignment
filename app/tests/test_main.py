@@ -1,0 +1,94 @@
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.main import app
+from app.db.session import get_db, Base
+from app.core.config import settings
+
+# Test database
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+@pytest.fixture
+def client():
+    Base.metadata.create_all(bind=engine)
+    with TestClient(app) as client:
+        yield client
+    Base.metadata.drop_all(bind=engine)
+
+def test_health_check(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json()["status"] == "healthy"
+
+def test_create_employee(client):
+    # First login as admin
+    login_response = client.post("/api/v1/auth/login", json={
+        "email": settings.default_admin_email,
+        "password": settings.default_admin_password
+    })
+    assert login_response.status_code == 200
+    token = login_response.json()["access_token"]
+    
+    # Create employee
+    employee_data = {
+        "name": "Test User",
+        "email": "test@company.com",
+        "department": "Engineering",
+        "joining_date": "2024-01-01"
+    }
+    
+    response = client.post(
+        "/api/v1/employees/",
+        json=employee_data,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == employee_data["name"]
+    assert data["email"] == employee_data["email"]
+
+def test_apply_leave(client):
+    # Login and create employee first
+    login_response = client.post("/api/v1/auth/login", json={
+        "email": settings.default_admin_email,
+        "password": settings.default_admin_password
+    })
+    token = login_response.json()["access_token"]
+    
+    # Get current user
+    user_response = client.get(
+        "/api/v1/employees/me",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    user = user_response.json()
+    
+    # Apply for leave
+    leave_data = {
+        "employee_id": user["id"],
+        "start_date": "2024-12-20",
+        "end_date": "2024-12-22",
+        "leave_type": "vacation",
+        "reason": "Holiday vacation"
+    }
+    
+    response = client.post(
+        "/api/v1/leaves/",
+        json=leave_data,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["leave_type"] == leave_data["leave_type"]
+    assert data["status"] == "pending"

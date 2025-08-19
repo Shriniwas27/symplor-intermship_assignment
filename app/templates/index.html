@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Leave Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-calendar-check text-primary"></i>
+            Leave Management System
+        </h1>
+        <p class="lead mb-4">Streamline your organization's leave management process with our comprehensive solution.</p>
+        
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Employee Management</h5>
+                        <p class="card-text">Add, update, and manage employee information with ease.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Leave Requests</h5>
+                        <p class="card-text">Submit and track leave requests with automated approval workflows.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Analytics</h5>
+                        <p class="card-text">Monitor leave balances and generate insightful reports.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <a href="/login" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-sign-in-alt"></i> Get Started
+            </a>
+            <a href="/dashboard" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-tachometer-alt"></i> View Dashboard
+            </a>
+        </div>
+
+        <div class="mt-5">
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Default Admin Credentials</h5>
+                <p><strong>Email:</strong> admin@company.com</p>
+                <p class="mb-0"><strong>Password:</strong> admin123</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
